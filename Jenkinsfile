@@ -1,90 +1,159 @@
+
 node {
 
+    /* =====================
+       REQUIREMENT ANALYSIS
+       ===================== */
     stage('Requirement Analysis') {
         sh '''
 python3 - <<EOF
-requirements = ["Login", "Dashboard", "Reports"]
+requirements = {
+    "auth": True,
+    "dashboard": True,
+    "reports": True
+}
+
 with open("requirements.txt", "w") as f:
-    for r in requirements:
-        f.write(r + "\\n")
-print("Requirements documented")
+    for k, v in requirements.items():
+        f.write(f"{k}:{v}\\n")
+
+print("Requirements finalized")
 EOF
 '''
     }
 
+    /* ========
+       DESIGN
+       ======== */
     stage('Design') {
         sh '''
 python3 - <<EOF
-with open("requirements.txt", "r") as f:
+with open("requirements.txt") as f:
     req = f.read()
 
-design = "System Design based on requirements:\\n" + req
-with open("design.txt", "w") as f:
-    f.write(design)
+design = {
+    "architecture": "MVC",
+    "language": "Python",
+    "based_on": req
+}
 
-print("Design completed")
+with open("design.txt", "w") as f:
+    f.write(str(design))
+
+print("Design approved")
 EOF
 '''
     }
 
+    /* =============
+       DEVELOPMENT
+       ============= */
     stage('Development') {
         sh '''
 python3 - <<EOF
-with open("app.py", "w") as f:
-    f.write("print('Application running successfully')\\n")
+code = """
+def main():
+    print("App started")
+    return 0
 
-print("Code developed")
+if __name__ == "__main__":
+    main()
+"""
+with open("app.py", "w") as f:
+    f.write(code)
+
+print("Code written")
 EOF
 '''
     }
 
+    /* ======
+       BUILD
+       ====== */
     stage('Build') {
-        sh '''
+        retry(2) {
+            sh '''
 python3 - <<EOF
 import os
-if os.path.exists("app.py"):
-    with open("build.txt", "w") as f:
-        f.write("Build successful")
-    print("Build successful")
-else:
-    raise Exception("Build failed")
+if not os.path.exists("app.py"):
+    raise Exception("Source code missing")
+
+with open("build.log", "w") as f:
+    f.write("Build successful")
+
+print("Build completed")
 EOF
 '''
+        }
     }
 
+    /* =================
+       PARALLEL TESTING
+       ================= */
     stage('Testing') {
-        sh '''
+        parallel(
+            unit_test: {
+                sh '''
 python3 - <<EOF
 import subprocess
-
 result = subprocess.run(["python3", "app.py"], capture_output=True, text=True)
-
-if "successfully" in result.stdout:
-    print("Tests passed")
-else:
-    raise Exception("Tests failed")
+if "App started" not in result.stdout:
+    raise Exception("Unit test failed")
+print("Unit test passed")
 EOF
 '''
+            },
+            lint_test: {
+                sh '''
+python3 - <<EOF
+print("Lint check passed (simulated)")
+EOF
+'''
+            }
+        )
     }
 
+    /* ============
+       QUALITY GATE
+       ============ */
+    stage('Quality Gate') {
+        timeout(time: 10, unit: 'SECONDS') {
+            sh '''
+python3 - <<EOF
+coverage = 85
+if coverage < 80:
+    raise Exception("Quality gate failed")
+print("Quality gate passed")
+EOF
+'''
+        }
+    }
+
+    /* ===========
+       DEPLOYMENT
+       =========== */
     stage('Deployment') {
         sh '''
 python3 - <<EOF
-with open("build.txt", "r") as f:
+with open("build.log") as f:
     status = f.read()
 
 if "successful" in status:
-    print("Application deployed successfully")
+    print("Application deployed to production")
 else:
-    raise Exception("Deployment failed")
+    raise Exception("Deployment blocked")
 EOF
 '''
     }
 
+    /* ===========
+       MAINTENANCE
+       =========== */
     stage('Maintenance') {
         sh '''
 python3 - <<EOF
-print("Monitoring and maintenance in progress")
+print("Monitoring logs, CPU, memory")
+print("No incidents found")
 EOF
 '''
     }
