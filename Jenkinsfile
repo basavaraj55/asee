@@ -2,21 +2,9 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout') {
+        stage('Run Script') {
             steps {
-                checkout scm
-            }
-        }
-
-        stage('Install Dependencies') {
-            steps {
-                sh 'pip install -r requirements.txt'
-            }
-        }
-
-        stage('Run Python Script') {
-            steps {
-                sh 'python app.py'
+                sh 'python3 app.py'
             }
         }
     }
