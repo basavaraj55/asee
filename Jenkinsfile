@@ -2,21 +2,21 @@ pipeline {
     agent any
 
     stages {
-        stage('Build') {
+        stage('Checkout') {
             steps {
-                echo 'Building the project...'
+                checkout scm
             }
         }
 
-        stage('Test') {
+        stage('Install Dependencies') {
             steps {
-                echo 'Running tests...'
+                sh 'pip install -r requirements.txt'
             }
         }
 
-        stage('Deploy') {
+        stage('Run Python Script') {
             steps {
-                echo 'Deploying application...'
+                sh 'python app.py'
             }
         }
     }
