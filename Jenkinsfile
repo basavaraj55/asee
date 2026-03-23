@@ -19,6 +19,12 @@ node {
         ls -l
         python3 add.py
         '''
+    stage('Run Repo Python 2 File') {
+        sh '''
+        echo "Running Python file from repository"
+        ls -l
+        python3 multi.py
+        '''    
     }
 
     stage('Build') {
