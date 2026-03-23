@@ -1,43 +1,25 @@
-node {
+pipeline {
+    agent any
 
-    stage('Checkout Repository') {
-        git branch: 'main',
-            url: 'https://github.com/basavaraj55/asee.git'
-    }
+    stages {
+        stage('Check Directory') {
+            steps {
+                script {
+                    def dirPath = "/var/lib/jenkins/asee"
 
-    stage('Requirement Analysis') {
-        echo 'Requirement analysis completed'
-    }
+                    if (fileExists(dirPath)) {
+                        echo "Directory exists: ${dirPath}"
+                    } else {
+                        error "Directory does NOT exist: ${dirPath}. Failing build."
+                    }
+                }
+            }
+        }
 
-    stage('Design') {
-        echo 'Design completed'
-    }
-
-    stage('Run Repo Python File') {
-        sh '''
-        echo "Running Python file from repository"
-        ls -l
-        python3 add.py
-        '''
-    }
-    
-    stage('Run Repo Python 2 File') {
-        sh '''
-        echo "Running Python file from repository"
-        ls -l
-        python3 multi.py
-        '''    
-    }
-
-    stage('Build') {
-        echo 'Build completed'
-    }
-
-    stage('Test') {
-        echo 'Tests completed'
-    }
-
-    stage('Deploy') {
-        echo 'Deployment completed'
+        stage('Build Stage') {
+            steps {
+                echo "Build is running because directory exists"
+            }
+        }
     }
 }
