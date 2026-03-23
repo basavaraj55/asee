@@ -2,15 +2,19 @@ pipeline {
     agent any
 
     stages {
-        stage('Check Directory') {
+        stage('Check & Create Directory') {
             steps {
                 script {
-                    def dirPath = "/var/lib/jenkins/asee"
+                    def baseDir = "/var/lib/jenkins/asee"
+                    def newDir  = "${baseDir}/build_${env.BUILD_NUMBER}"
 
-                    if (fileExists(dirPath)) {
-                        echo "Directory exists: ${dirPath}"
+                    if (fileExists(baseDir)) {
+                        echo "✅ Base directory exists: ${baseDir}"
+
+                        sh "mkdir -p ${newDir}"
+                        echo "✅ New directory created: ${newDir}"
                     } else {
-                        error "Directory does NOT exist: ${dirPath}. Failing build."
+                        error "❌ Base directory does NOT exist: ${baseDir}. Failing build."
                     }
                 }
             }
@@ -18,7 +22,7 @@ pipeline {
 
         stage('Build Stage') {
             steps {
-                echo "Build is running because directory exists"
+                echo "✅ Build running after directory creation"
             }
         }
     }
