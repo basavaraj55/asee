@@ -1,11 +1,13 @@
-pipeline {
-    agent any
+node {
+    stage('Start') {
+        echo 'This is a Scripted Pipeline'
+    }
 
-    stages {
-        stage('Run Script') {
-            steps {
-                sh 'python3 app.py'
-            }
-        }
+    stage('Build') {
+        echo 'Building the project...'
+    }
+
+    stage('End') {
+        echo 'Pipeline Completed'
     }
 }
