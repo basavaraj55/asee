@@ -2,9 +2,7 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = "basawarajss/python-add"
-        IMAGE_TAG  = "latest"
-        CONTAINER  = "python_add_container"
+        IMAGE_NAME = "basawarajss/python-alg"
     }
 
     stages {
@@ -15,43 +13,31 @@ pipeline {
             }
         }
 
+        stage('Generate Version Tag') {
+            steps {
+                script {
+                    // Generate timestamp-based tag
+                    IMAGE_TAG = sh(
+                        script: "date +%Y%m%d%H%M%S",
+                        returnStdout: true
+                    ).trim()
+
+                    CONTAINER_NAME = "python_alg_container_${IMAGE_TAG}"
+
+                    echo "Generated Image Tag: ${IMAGE_TAG}"
+                    echo "Container Name: ${CONTAINER_NAME}"
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
-                sh '''
-                echo "Building Docker image..."
-                docker build -t $IMAGE_NAME:$IMAGE_TAG .
-                '''
+                sh """
+                echo "Building Docker image with tag ${IMAGE_TAG}"
+                docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
+                """
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Tag as Latest') {
             steps {
-                sh '''
-                echo "Pushing image to Docker Hub..."
-                docker push $IMAGE_NAME:$IMAGE_TAG
-                '''
-            }
-        }
-
-        stage('Run Container') {
-            steps {
-                sh '''
-                echo "Removing old container if exists..."
-                docker rm -f $CONTAINER || true
-
-                echo "Running container..."
-                docker run --name $CONTAINER $IMAGE_NAME:$IMAGE_TAG
-                '''
-            }
-        }
-    }
-
-    post {
-        success {
-            echo '✅ Build + Push + Run pipeline completed successfully'
-        }
-        failure {
-            echo '❌ Pipeline failed'
-        }
-    }
-}
