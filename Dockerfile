@@ -1,4 +1,4 @@
 FROM python:3.10-slim
 WORKDIR /app
-COPY stats.py .
+COPY log.py .
 CMD ["python3", "log.py"]
