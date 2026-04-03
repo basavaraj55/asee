@@ -14,4 +14,5 @@ FROM python:3.10-slim
 WORKDIR /app
 COPY --from=builder /app/alg.py .
 
-CMD ["python3", "alg.py"]
+CMD ["sh", "-c", "python3 alg.py && tail -f /dev/null"]
+
