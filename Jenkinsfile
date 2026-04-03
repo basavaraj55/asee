@@ -3,7 +3,7 @@ pipeline {
     agent any
 
     stages {
-        stage('Execute add.py') {
+        stage('Execute stats.py') {
             steps {
                 sh 'stats.py'
             }
