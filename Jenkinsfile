@@ -2,12 +2,14 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "basawarajss/python-stats"
-        DOCKER_TAG   = "latest"
+        IMAGE_NAME = "basawarajss/python-add"
+        IMAGE_TAG  = "latest"
+        CONTAINER  = "python_add_container"
     }
 
     stages {
-        stage('Checkout Source') {
+
+        stage('Checkout Code') {
             steps {
                 checkout scm
             }
@@ -17,16 +19,28 @@ pipeline {
             steps {
                 sh '''
                 echo "Building Docker image..."
-                docker build -t $DOCKER_IMAGE:$DOCKER_TAG .
+                docker build -t $IMAGE_NAME:$IMAGE_TAG .
                 '''
             }
         }
 
-        stage('Push Image to DockerHub') {
+        stage('Push Docker Image') {
             steps {
                 sh '''
-                echo "Pushing Docker image to Docker Hub..."
-                docker push $DOCKER_IMAGE:$DOCKER_TAG
+                echo "Pushing image to Docker Hub..."
+                docker push $IMAGE_NAME:$IMAGE_TAG
+                '''
+            }
+        }
+
+        stage('Run Container') {
+            steps {
+                sh '''
+                echo "Removing old container if exists..."
+                docker rm -f $CONTAINER || true
+
+                echo "Running container..."
+                docker run --name $CONTAINER $IMAGE_NAME:$IMAGE_TAG
                 '''
             }
         }
@@ -34,7 +48,7 @@ pipeline {
 
     post {
         success {
-            echo '✅ Docker image built and pushed successfully'
+            echo '✅ Build + Push + Run pipeline completed successfully'
         }
         failure {
             echo '❌ Pipeline failed'
